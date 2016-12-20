@@ -18,6 +18,7 @@
 */
 #include <stdexcept>
 #include "ledmgrbase.hpp"
+#include "libIBus.h"
 
 static blinkOp_t g_blink_pattern_slow_blink[] = {{500, true}, {1000, false}};
 static blinkOp_t g_blink_pattern_double_blink[] = {{200, true}, {100, false}, {200, true}, {1000, false}};
@@ -60,11 +61,16 @@ ledMgrBase::ledMgrBase()
 	REPORT_IF_UNEQUAL(0, pthread_mutexattr_init(&mutex_attribute));
 	REPORT_IF_UNEQUAL(0, pthread_mutexattr_settype(&mutex_attribute, PTHREAD_MUTEX_ERRORCHECK));
 	REPORT_IF_UNEQUAL(0, pthread_mutex_init(&m_mutex, &mutex_attribute));
+
+	REPORT_IF_UNEQUAL(0, IARM_Bus_Init(IARMBUS_OWNER_NAME));
+	REPORT_IF_UNEQUAL(0, IARM_Bus_Connect());
 }
 
 ledMgrBase::~ledMgrBase()
 {
 	pthread_mutex_destroy(&m_mutex);
+	REPORT_IF_UNEQUAL(0, IARM_Bus_Disconnect());
+	REPORT_IF_UNEQUAL(0, IARM_Bus_Term());
 }
 
 void ledMgrBase::setPowerState(bool state)

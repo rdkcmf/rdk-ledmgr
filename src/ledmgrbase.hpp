@@ -24,6 +24,7 @@
 #include "pthread.h"
 #include "fp_profile.hpp"
 
+#define IARMBUS_OWNER_NAME "ledmgr"
 class ledMgrBase
 {
 	protected:

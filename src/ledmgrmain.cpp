@@ -36,7 +36,6 @@
 
 #include "ledmgr_types.hpp"
 #include "ledmgr.hpp"
-#define IARMBUS_OWNER_NAME "ledmgr"
 
 sem_t g_app_done_sem;
 
@@ -256,14 +255,6 @@ void sysEventHandler(const char *owner, IARM_EventId_t eventId, void *data, size
 int32_t init_event_handlers()
 {
 	int32_t ret;
-	if(0 != IARM_Bus_Init(IARMBUS_OWNER_NAME))
-	{
-		goto err_1;
-	}
-	if(0 != IARM_Bus_Connect())
-	{
-		goto err_2;
-	}
 	if(0 != IARM_Bus_RegisterEventHandler(IARM_BUS_SYSMGR_NAME, IARM_BUS_SYSMGR_EVENT_SYSTEMSTATE, sysEventHandler))
 	{
 		goto err_3;
@@ -304,10 +295,6 @@ err_5:
 err_4:
 	IARM_Bus_UnRegisterEventHandler(IARM_BUS_SYSMGR_NAME, IARM_BUS_SYSMGR_EVENT_SYSTEMSTATE);
 err_3:
-	IARM_Bus_Disconnect();
-err_2:
-	IARM_Bus_Term();
-err_1:
 	ERROR("Error initializing event handlers\n");
 	return -1;
 }
@@ -318,8 +305,6 @@ int32_t term_event_handlers()
 	IARM_Bus_UnRegisterEventHandler(IARM_BUS_PWRMGR_NAME,  IARM_BUS_PWRMGR_EVENT_RESET_SEQUENCE);
 	IARM_Bus_UnRegisterEventHandler(IARM_BUS_PWRMGR_NAME,  IARM_BUS_PWRMGR_EVENT_MODECHANGED);
 	IARM_Bus_UnRegisterEventHandler(IARM_BUS_SYSMGR_NAME, IARM_BUS_SYSMGR_EVENT_SYSTEMSTATE);
-	IARM_Bus_Disconnect();
-	IARM_Bus_Term();
 	INFO("Successfully terminated all event handlers\n");
 	return 0;
 }
