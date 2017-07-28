@@ -388,6 +388,7 @@ void* command_line_prompt(void *ptr)
 
 int main(int argc, char *argv[])
 {
+	setlinebuf(stdout); //necessary to make sure the logs get flushed when running as a daemon/service
 	INFO("ledmgr is running\n");
 	if(0 != sem_init(&g_app_done_sem, 0, 0))
 	{
