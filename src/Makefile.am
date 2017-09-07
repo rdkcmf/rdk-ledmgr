@@ -17,12 +17,12 @@
 # limitations under the License.
 ##########################################################################
 bin_PROGRAMS = ledmgr
-ledmgr_SOURCES = extended/ledmgr.cpp ledmgrbase.cpp ledmgrmain.cpp indicator.cpp fp_profile.hpp indicator.hpp ledmgrbase.hpp extended/ledmgr.hpp ledmgr_types.hpp
+ledmgr_SOURCES = ledmgrbase.cpp ledmgrmain.cpp indicator.cpp fp_profile.hpp indicator.hpp ledmgrbase.hpp ledmgr_types.hpp
 ledmgr_CPPFLAGS = -I$(PKG_CONFIG_SYSROOT_DIR)${includedir}/rdk/iarmbus -I$(PKG_CONFIG_SYSROOT_DIR)${includedir}/rdk/iarmmgrs/sysmgr \
 	-I$(PKG_CONFIG_SYSROOT_DIR)${includedir}/rdk/iarmmgrs/ir -I$(PKG_CONFIG_SYSROOT_DIR)${includedir}/rdk/iarmmgrs-hal \
 	-I$(PKG_CONFIG_SYSROOT_DIR)${includedir}/rdk/ds -I$(PKG_CONFIG_SYSROOT_DIR)${includedir}/rdk/ds-hal \
 	-I$(PKG_CONFIG_SYSROOT_DIR)${includedir}/glib-2.0 -I$(PKG_CONFIG_SYSROOT_DIR)${includedir}/glib-2.0/include \
 	-I${RDK_FSROOT_PATH}/usr/lib/glib-2.0/include \
 	-I${RDK_FSROOT_PATH}/usr/include \
-	-I$(srcdir)/extended
-ledmgr_LDADD = -lpthread -lglib-2.0 -L${RDK_FSROOT_PATH}/usr/local/lib -L${RDK_FSROOT_PATH}/usr/lib -lIARMBus -lds -ldshalcli
+	-I${RDK_FSROOT_PATH}/usr/include/ledmgr
+ledmgr_LDADD = -lledmgr_extended -lpthread -lglib-2.0 -L${RDK_FSROOT_PATH}/usr/local/lib -L${RDK_FSROOT_PATH}/usr/lib -lIARMBus -lds -ldshalcli
