@@ -19,6 +19,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdint.h>
+#include <cstdlib>
+#include <string.h>
 #include <semaphore.h>
 #include <glib.h>
 #include <pthread.h>
@@ -325,16 +327,27 @@ void* command_line_prompt(void *ptr)
 {
 	while(true)
 	{
+		int singleExecution = 0;
 		int choice = 0;
-		print_menu();
-		INFO("Enter command:\n");
-		if(!(std::cin >> choice))
+		
+		if(NULL == ptr) // Print menu and read the option for multiple execution in CLI mode
 		{
-			ERROR("Oops!\n");
-			cin.clear();
-			cin.ignore(10000, '\n');
-			continue;
+			print_menu();
+			INFO("Enter command:\n");
+			if(!(std::cin >> choice))
+			{
+				ERROR("Oops!\n");
+				cin.clear();
+				cin.ignore(10000, '\n');
+				continue;
+			}
 		}
+		else
+		{
+			choice = *((int *)ptr);
+			cout << "Choice is : "<<choice<<endl;
+			singleExecution = 1;
+		} 
 		
 		switch(choice)
 		{
@@ -382,6 +395,9 @@ void* command_line_prompt(void *ptr)
 				ERROR("Unknown option.\n");
 				break;
 		}
+		
+		if(singleExecution) // To come out of loop in case of single execution in CLI mode
+			break;
 	}
 	return NULL;
 }
@@ -406,16 +422,32 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	INFO("Successfully initialized event handlers\n");
+	
 
 	//TODO: Development aid. Remove
 	/*Check and enable diagnostic aid*/
-	if(1 < argc)
+	if(2 == argc)
 	{
 		pthread_t thread;
 		if(0 != pthread_create(&thread, NULL, command_line_prompt, NULL))
 		{
 			ERROR("Could not launch command line interface.\n");
 		}
+	}
+	
+	if(3 == argc)
+	{
+		int stcmp_result = strcmp(argv[1],"--CLI");
+		if (0 == stcmp_result)
+		{
+			print_menu();
+			int arg = strtol(argv[2],NULL,10);
+			pthread_t thread;
+			if(0 != pthread_create(&thread, NULL, command_line_prompt, (void *)&arg))
+			{
+				ERROR("Could not launch command line interface.\n");
+			}
+		}	
 	}
 
 	/*Enter event loop */
