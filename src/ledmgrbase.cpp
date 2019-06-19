@@ -24,6 +24,14 @@ static blinkOp_t g_blink_pattern_slow_blink[] = {{500, true}, {1000, false}};
 static blinkOp_t g_blink_pattern_double_blink[] = {{200, true}, {100, false}, {200, true}, {1000, false}};
 static blinkOp_t g_blink_pattern_fast_blink[] = {{200, true}, {100, false}};
 
+/**
+ * @addtogroup LED_APIS
+ * @{
+ */
+
+/**
+ * @brief This API prints pattern details include id, sequence.
+ */
 void ledMgrBase::diagnostics()
 {
 	std::cout<<"Size of the pattern list is "<<m_patterns.size()<<"\n";
@@ -33,7 +41,13 @@ void ledMgrBase::diagnostics()
 	}
 }
 
-/*Note: throws std::invalid_argument exception*/
+/**
+ * @brief This API search for the matching indicator and return the indicator.
+ *
+ * @return  Returns matching indicator.
+ *
+ * Note: throws std::invalid_argument exception
+ */
 indicator& ledMgrBase::getIndicator(const std::string &name)
 {
 	std::vector <indicator>::iterator iter;
@@ -44,7 +58,7 @@ indicator& ledMgrBase::getIndicator(const std::string &name)
 			break;
 		}
 	}
-	
+
 	if(iter == m_indicators.end())
 	{
 		ERROR("No matching indicator found!\n")
@@ -53,6 +67,9 @@ indicator& ledMgrBase::getIndicator(const std::string &name)
 	return *iter;
 }
 
+/**
+ * @brief Constructor function performs initialization.
+ */
 ledMgrBase::ledMgrBase()
 {
 	m_is_powered_on = false;
@@ -66,6 +83,9 @@ ledMgrBase::ledMgrBase()
 	REPORT_IF_UNEQUAL(0, IARM_Bus_Connect());
 }
 
+/**
+ * @brief Destructor API.
+ */
 ledMgrBase::~ledMgrBase()
 {
 	pthread_mutex_destroy(&m_mutex);
@@ -73,6 +93,11 @@ ledMgrBase::~ledMgrBase()
 	REPORT_IF_UNEQUAL(0, IARM_Bus_Term());
 }
 
+/**
+ * @brief This function sets the power state.
+ *
+ * @param[in] state   power state.
+ */
 void ledMgrBase::setPowerState(bool state)
 {
 	REPORT_IF_UNEQUAL(0, pthread_mutex_lock(&m_mutex));
@@ -80,6 +105,11 @@ void ledMgrBase::setPowerState(bool state)
 	REPORT_IF_UNEQUAL(0, pthread_mutex_unlock(&m_mutex));
 }
 
+/**
+ * @brief This function used to get the power state.
+ *
+ * @return  Returns power state.
+ */
 bool ledMgrBase::getPowerState()
 {
 	bool state;
@@ -89,6 +119,14 @@ bool ledMgrBase::getPowerState()
 	return state;
 }
 
+/**
+ * @brief This API stores the error and returns the transition state in order to call appropriate ledmgr indicator api.
+ *
+ * @param[in] position   error position which points to the error type.
+ * @param[in] value      error state which points to true or false.
+ *
+ * @return  Returns error state transition.
+ */
 bool ledMgrBase::setError(unsigned int position, bool value)
 {
 	if(32 > position)
@@ -125,17 +163,30 @@ bool ledMgrBase::setError(unsigned int position, bool value)
 	}
 }
 
+/**
+ * @brief This API creates blink patterns using the pattern type, duration, sequence … etc. as parameters.
+ */
 int ledMgrBase::createBlinkPatterns()
 {
 	m_patterns.resize(NUM_PATTERNS);
 	m_patterns[STATE_SLOW_BLINK] = {STATE_SLOW_BLINK, 2, g_blink_pattern_slow_blink};
-	m_patterns[STATE_DOUBLE_BLINK] = {STATE_DOUBLE_BLINK, 4, g_blink_pattern_double_blink}; 
+	m_patterns[STATE_DOUBLE_BLINK] = {STATE_DOUBLE_BLINK, 4, g_blink_pattern_double_blink};
 	m_patterns[STATE_FAST_BLINK] = {STATE_FAST_BLINK, 2, g_blink_pattern_fast_blink};
 	INFO("Complete\n");
 	return 0;
 }
 
+/**
+ * @brief This API return the desired pattern info with respect to pattern type.
+ *
+ * @param[in] type  Blink pattern type.
+ *
+ * @return  Returns corresponding blink pattern info structure.
+ */
 const blinkPattern_t * ledMgrBase::getPattern(blinkPatternType_t type) const
 {
     return &m_patterns[type];
 }
+
+
+/** @} */  //END OF GROUP LED_APIS

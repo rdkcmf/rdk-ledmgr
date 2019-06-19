@@ -24,7 +24,15 @@
 #include "pthread.h"
 #include "fp_profile.hpp"
 
+/**
+ * @addtogroup LED_TYPES
+ * @{
+ */
 #define IARMBUS_OWNER_NAME "ledmgr"
+
+/* @} */ // End of group LED_TYPES
+
+
 class ledMgrBase
 {
 	protected:
