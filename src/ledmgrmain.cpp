@@ -16,6 +16,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
+
+/**
+ * @defgroup LED LED Manager
+ * - The LED Manager is an application that is responsible for controlling the LEDs on the product. 
+ * - Manages the STB front panel color LED to communicate the system status.
+ *
+ * @defgroup LED_TYPES LED Data types
+ * @ingroup  LED
+ *
+ * @defgroup LED_APIS  LED API
+ * @ingroup  LED
+ *
+ **/
 #include <iostream>
 #include <stdio.h>
 #include <stdint.h>
@@ -41,6 +54,14 @@
 
 sem_t g_app_done_sem;
 
+/**
+ * @addtogroup LED_APIS
+ * @{
+ */
+/** @brief This API is used to trace the debug logs prints.
+ *
+ *  @param[in] state  system state
+ */
 void trace_event(int state)
 {
 #define HANDLE(event) case event:\
@@ -97,6 +118,9 @@ void trace_event(int state)
 #undef HANDLE
 }
 
+/**
+ * @brief This API toggles between two LED modes, such as Dimming the light and Setting full brightness.
+ */
 void toggleBrightness()
 {
 	using namespace device;
@@ -115,13 +139,29 @@ void toggleBrightness()
 	}
 }
 
+/** @brief This API  receives the IR events from IR manager to handle the detected key pressed and give LED indication accordingly using received keycode and type.
+ *
+ *  @param[in] owner  	owner of the event
+ *  @param[in] eventId  event ID
+ *  @param[in] data 	event data
+ *  @param[in] len  	event size
+ */
 void keyEventHandler(const char *owner, IARM_EventId_t eventId, void *data, size_t len)
 {
 	IARM_Bus_IRMgr_EventData_t *irEventData = (IARM_Bus_IRMgr_EventData_t*) data;
 	ledMgr::getInstance().handleKeyPress(irEventData->data.irkey.keyCode, irEventData->data.irkey.keyType);
-	return;	
+	return;
 }
 
+/** @brief This API handles power mode change events received from power manager.
+ *
+ *  Power Manager monitors Power IR key events and reacts to power state changes.
+ *
+ *  @param[in] owner  	owner of the event
+ *  @param[in] eventId  power manager event ID
+ *  @param[in] data  	event data
+ *  @param[in] len 	event size
+ */
 void powerEventHandler(const char *owner, IARM_EventId_t eventId, void *data, size_t len)
 {
 	IARM_Bus_PWRMgr_EventData_t *eventData = (IARM_Bus_PWRMgr_EventData_t *)data;
@@ -140,7 +180,7 @@ void powerEventHandler(const char *owner, IARM_EventId_t eventId, void *data, si
 			}
 			else
 			{
-				INFO("Exit reset sequence.\n"); 
+				INFO("Exit reset sequence.\n");
 				ledMgr::getInstance().handleDeviceResetAbort();
 			}
 			break;
@@ -149,12 +189,26 @@ void powerEventHandler(const char *owner, IARM_EventId_t eventId, void *data, si
 	}
 }
 
+/** @brief This callback notification received when there is a system mode change to handle from  IARM manager.
+ *
+ *  @param[in] arg  system mode change param
+ *
+ *  @return Returns status of the operation.
+ */
 IARM_Result_t modeChangeHandler(void *arg)
 {
 	IARM_Bus_CommonAPI_SysModeChange_Param_t *param = (IARM_Bus_CommonAPI_SysModeChange_Param_t *)arg;
 	ledMgr::getInstance().handleModeChange((unsigned int) param->newMode);
-	return IARM_RESULT_SUCCESS;	
+	return IARM_RESULT_SUCCESS;
 }
+
+/** @brief To handle IARM BUS system state event callback.
+ *
+ *  @param[in] owner  	owner of the event
+ *  @param[in] eventId  event ID
+ *  @param[in] data  	event data
+ *  @param[in] len 	event size
+ */
 void sysEventHandler(const char *owner, IARM_EventId_t eventId, void *data, size_t len)
 {
 	IARM_Bus_SYSMgr_EventData_t *sysEventData = (IARM_Bus_SYSMgr_EventData_t*)data;
@@ -254,6 +308,9 @@ void sysEventHandler(const char *owner, IARM_EventId_t eventId, void *data, size
 	}
 }
 
+/**
+ * @brief To Register required IARM event handlers with appropriate callback function to handle the event.
+ */
 int32_t init_event_handlers()
 {
 	int32_t ret;
@@ -301,6 +358,9 @@ err_3:
 	return -1;
 }
 
+/**
+ * @brief This API UnRegister IARM event handlers in order to release bus-facing resources.
+ */
 int32_t term_event_handlers()
 {
 	IARM_Bus_UnRegisterEventHandler(IARM_BUS_IRMGR_NAME, IARM_BUS_IRMGR_EVENT_IRKEY);
@@ -311,6 +371,9 @@ int32_t term_event_handlers()
 	return 0;
 }
 
+/**
+ * @brief This API prints the LED use-cases.
+ */
 void print_menu()
 {
 	INFO("Menu:\n");
@@ -323,13 +386,16 @@ void print_menu()
 	INFO("7. Simulate reset abort\n");
 }
 
+/**
+ * @brief This Thread launches command line interface.
+ */
 void* command_line_prompt(void *ptr)
 {
 	while(true)
 	{
 		int singleExecution = 0;
 		int choice = 0;
-		
+
 		if(NULL == ptr) // Print menu and read the option for multiple execution in CLI mode
 		{
 			print_menu();
@@ -390,12 +456,12 @@ void* command_line_prompt(void *ptr)
 					powerEventHandler(NULL, IARM_BUS_PWRMGR_EVENT_RESET_SEQUENCE, &eventData, 0);
 				}
 				break;
-			
+
 			default:
 				ERROR("Unknown option.\n");
 				break;
 		}
-		
+
 		if(singleExecution) // To come out of loop in case of single execution in CLI mode
 			break;
 	}
@@ -462,3 +528,4 @@ int main(int argc, char *argv[])
 }
 
 
+/** @} */  //END OF GROUP LED_APIS

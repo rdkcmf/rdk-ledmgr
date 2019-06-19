@@ -20,7 +20,20 @@
 #include "frontPanelConfig.hpp"
 static const unsigned int INVALID_COLOR =  0xFFFFFFFF;
 
-static gboolean masterBlinkCallbackFunction(gpointer data)
+/**
+ * @addtogroup LED_APIS
+ * @{
+ */
+
+
+ /**
+ * @brief Callback function to perform indicator brightness with type "Blink".
+ *
+ * @param[in] data      address of indicator class.
+ *
+ * @return  Returns corresponding blink pattern info structure.
+ */
+ static gboolean masterBlinkCallbackFunction(gpointer data)
 {
 	indicator *ptr = (indicator *)data;
 	DEBUG("Enter\n");
@@ -28,6 +41,13 @@ static gboolean masterBlinkCallbackFunction(gpointer data)
 	return false;
 }
 
+/**
+ * @brief Callback function to preform indicator brightness with flare value.
+ *
+ * @param[in] data      address of indicator class.
+ *
+ * @return  Returns corresponding blink pattern info structure.
+ */
 static gboolean masterFlareCallbackFunction(gpointer data)
 {
 	indicator *ptr = (indicator *)data;
@@ -70,11 +90,22 @@ indicator::~indicator()
 	pthread_mutex_destroy(&m_mutex);
 }
 
+/**
+ * @brief API to return the indicator name.
+ *
+ * @return  Returns indicator name.
+ */
 const std::string& indicator::getName() const
 {
 	return m_name;
 }
 
+/**
+ * @brief This API sets the indicator color.
+ *
+ * @param[in] color   indicator color to be set.
+ *
+ */
 int indicator::setColor(const unsigned int color)
 {
 	using namespace device;
@@ -84,10 +115,15 @@ int indicator::setColor(const unsigned int color)
 	}
 	catch(...)
 	{
-		ERROR("Error setting color!\n");	
+		ERROR("Error setting color!\n");
 	}
 }
 
+/**
+ * @brief This API sets the brightness of the specified LED.
+ *
+ * @param[in] intensity   intensity value of brightness.
+ */
 int indicator::setBrightness(unsigned int intensity)
 {
 	using namespace device;
@@ -100,6 +136,15 @@ int indicator::setBrightness(unsigned int intensity)
 		ERROR("Error setting indicator brightness!\n");
 	}
 }
+
+/**
+ * @brief This API enables the indicator to blink with the specified blinking pattern.
+ *
+ * @param[in] pattern		blink pattern.
+ * @param[in] repetitions	number of repetition count.
+ *
+ * @return  Returns status of the operation.
+ */
 int indicator::setBlink(const blinkPattern_t *pattern, int repetitions)
 {
 	if((0 == repetitions) || (2 > pattern->num_sequences))
@@ -109,7 +154,7 @@ int indicator::setBlink(const blinkPattern_t *pattern, int repetitions)
 	}
 	INFO("Start\n");
 	REPORT_IF_UNEQUAL(0, pthread_mutex_lock(&m_mutex));
-	
+
 	
 	/*Cancel previous blink pattern if any*/
 	if(0 != m_source_id)
@@ -135,6 +180,11 @@ int indicator::setBlink(const blinkPattern_t *pattern, int repetitions)
 	return 0;
 }
 
+/**
+ * @brief This API is to register timer callback function depends on iteration pattern(indefinite iteration and finite iteration).
+ *
+ * @return  Returns status of the operation.
+ */
 int indicator::step()
 {
 	DEBUG("Start\n");
@@ -190,6 +240,9 @@ int indicator::step()
 	return 0;
 }
 
+/**
+ * @brief This API requests to process the pattern iteration steps.
+ */
 int indicator::timerCallback()
 {
 	DEBUG("Enter\n");
@@ -200,6 +253,13 @@ int indicator::timerCallback()
 	return 0;
 }
 
+/**
+ * @brief This API register timer callback function in order to complete the blinking pattern iteration count.
+ *
+ * @param[in] milliseconds   time interval between calls to the callback function.
+ *
+ * @return  Returns status of the operation.
+ */
 int indicator::registerCallback(unsigned int milliseconds)
 {
 	if(0 == milliseconds)
@@ -215,6 +275,13 @@ int indicator::registerCallback(unsigned int milliseconds)
 	return 0;
 }
 
+/**
+ * @brief This API cancel the current blinking indicator if any, to change the state .
+ *
+ * @param[in] state   indicator state.
+ *
+ * @return  Returns status of the operation.
+ */
 int indicator::setState(indicatorState_t state)
 {
 	INFO("state 0x%x\n", state);
@@ -223,7 +290,7 @@ int indicator::setState(indicatorState_t state)
 		ERROR("Unsupported state!\n");
 		return -1;
 	}
-	
+
 	REPORT_IF_UNEQUAL(0, pthread_mutex_lock(&m_mutex));
 	/*Cancel any blinking*/
 	if(STATE_BLINKING ==  m_state)
@@ -249,6 +316,13 @@ int indicator::setState(indicatorState_t state)
 	return 0;
 }
 
+/**
+ * @brief This API sets the indicator state.
+ *
+ * @param[in] enable   indicator state.
+ *
+ * @return  Returns status of the operation.
+ */
 int indicator::enableIndicator(bool enable)
 {
 	using namespace device;
@@ -263,6 +337,12 @@ int indicator::enableIndicator(bool enable)
 	return 0;
 }
 
+/**
+ * @brief This API saves all the current indicator related properties.
+ *
+ * When iterations >= 0 and the number of iterations has successfully completed, the LED will be left to the color/brightness as specified
+ * by the LAST element in the array
+ */
 void indicator::saveState(void)
 {
 	REPORT_IF_UNEQUAL(0, pthread_mutex_lock(&m_mutex));
@@ -289,6 +369,12 @@ void indicator::saveState(void)
 	INFO("Saved state.\n");
 }
 
+/**
+ * @brief API to restore the indicator properties from saved indicator properties.
+ *
+ * When iterations >= 0 and the number of iterations has successfully completed, the LED will be left to the color/brightness as specified
+ * by the LAST element in the array
+ */
 void indicator::restoreState(void)
 {
 	REPORT_IF_UNEQUAL(0, pthread_mutex_lock(&m_mutex));
@@ -336,6 +422,12 @@ void indicator::restoreState(void)
 	REPORT_IF_UNEQUAL(0, pthread_mutex_unlock(&m_mutex));
 }
 
+/**
+ * @brief Register Flare callback function to set indicator brightness as flare.
+ *
+ * @param[in] percentage_increase	flare percentage to be increased.
+ * @param[in] length_ms   		time interval between calls to the callback function.
+ */
 void indicator::executeFlare(const unsigned int percentage_increase, const unsigned int length_ms)
 {
 	using namespace device;
@@ -365,6 +457,9 @@ void indicator::executeFlare(const unsigned int percentage_increase, const unsig
 	}
 }
 
+/**
+ * @brief API to perform indicator brightness with flare value.
+ */
 void indicator::flareCallback()
 {
 	using namespace device;
@@ -379,3 +474,5 @@ void indicator::flareCallback()
 	}
 	setBrightness(preflare_brightness);
 }
+
+/** @} */  //END OF GROUP LED_APIS

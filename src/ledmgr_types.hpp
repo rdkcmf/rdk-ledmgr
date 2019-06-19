@@ -38,6 +38,10 @@
 #define REPORT_IF_UNEQUAL(lhs, rhs) do {\
 	if((lhs) != (rhs)) LOG("ERROR", "Unexpected error!\n");}while(0);
 
+/**
+ * @addtogroup LED_TYPES
+ * @{
+ */
 typedef enum
 {
 	STATE_STEADY_ON = 0,
@@ -48,15 +52,18 @@ typedef enum
 
 typedef struct
 {
-	unsigned int length; //milliseconds
-	bool isOn; 
+	unsigned int length;	/**< milliseconds */
+	bool isOn;
 }blinkOp_t;
 
 typedef struct
 {
 	unsigned int id;
 	unsigned char num_sequences;
-	blinkOp_t * sequence; /*Array of {duration, intensity} values in a defined sequence*/
+	blinkOp_t * sequence;	/**< Array of {duration, intensity} values in a defined sequence */
 }blinkPattern_t;
+
+/* @} */ // End of group LED_TYPES
+
 
 #endif /*LEDMGR_TYPES_H*/
