@@ -98,7 +98,7 @@ ledMgrBase::~ledMgrBase()
  *
  * @param[in] state   power state.
  */
-void ledMgrBase::setPowerState(bool state)
+void ledMgrBase::setPowerState(int state)
 {
 	REPORT_IF_UNEQUAL(0, pthread_mutex_lock(&m_mutex));
 	m_is_powered_on = state;
@@ -110,9 +110,9 @@ void ledMgrBase::setPowerState(bool state)
  *
  * @return  Returns power state.
  */
-bool ledMgrBase::getPowerState()
+int ledMgrBase::getPowerState()
 {
-	bool state;
+	int state;
 	REPORT_IF_UNEQUAL(0, pthread_mutex_lock(&m_mutex));
 	state = m_is_powered_on;
 	REPORT_IF_UNEQUAL(0, pthread_mutex_unlock(&m_mutex));

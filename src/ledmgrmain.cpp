@@ -148,8 +148,13 @@ void toggleBrightness()
  */
 void keyEventHandler(const char *owner, IARM_EventId_t eventId, void *data, size_t len)
 {
-	IARM_Bus_IRMgr_EventData_t *irEventData = (IARM_Bus_IRMgr_EventData_t*) data;
-	ledMgr::getInstance().handleKeyPress(irEventData->data.irkey.keyCode, irEventData->data.irkey.keyType);
+	if( IARM_BUS_PWRMGR_POWERSTATE_STANDBY_DEEP_SLEEP != ledMgr::getInstance().getPowerState() )
+	{
+		IARM_Bus_IRMgr_EventData_t *irEventData = (IARM_Bus_IRMgr_EventData_t*) data;
+		ledMgr::getInstance().handleKeyPress(irEventData->data.irkey.keyCode, irEventData->data.irkey.keyType);	
+	}
+	else
+		INFO("power state is deepsleep, handleKeyPress not invoked");
 	return;
 }
 
@@ -168,7 +173,7 @@ void powerEventHandler(const char *owner, IARM_EventId_t eventId, void *data, si
 	switch(eventId)
 	{
 		case IARM_BUS_PWRMGR_EVENT_MODECHANGED:
-			ledMgr::getInstance().setPowerState(IARM_BUS_PWRMGR_POWERSTATE_ON == eventData->data.state.newState ? true : false );
+			ledMgr::getInstance().setPowerState(eventData->data.state.newState);
 			INFO("Detected power status change to 0x%x\n", eventData->data.state.newState);
 			break;
 
@@ -334,7 +339,7 @@ int32_t init_event_handlers()
 
 	IARM_Bus_PWRMgr_GetPowerState_Param_t power_query_arg;
 	REPORT_IF_UNEQUAL(IARM_RESULT_SUCCESS, IARM_Bus_Call(IARM_BUS_PWRMGR_NAME, "GetPowerState", (void *)&power_query_arg, sizeof(power_query_arg)));
-	ledMgr::getInstance().setPowerState(IARM_BUS_PWRMGR_POWERSTATE_ON == power_query_arg.curState ? true : false );
+	ledMgr::getInstance().setPowerState(power_query_arg.curState);
 
 
 	if(0 != IARM_Bus_RegisterCall(IARM_BUS_COMMON_API_SysModeChange, modeChangeHandler))
