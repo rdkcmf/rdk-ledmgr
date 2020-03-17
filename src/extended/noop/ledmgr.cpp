@@ -45,7 +45,7 @@ ledMgr& ledMgr::getInstance()
  */
 void ledMgr::handleModeChange(unsigned int mode)
 {
-        if(false == getPowerState())
+        if(IARM_BUS_PWRMGR_POWERSTATE_ON != getPowerState())
         {
                 return;
         }

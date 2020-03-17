@@ -36,7 +36,7 @@
 class ledMgrBase
 {
 	protected:
-		bool m_is_powered_on;
+		int m_is_powered_on;
 		unsigned int m_error_flags;
 		pthread_mutex_t m_mutex;
 		std::vector <blinkPattern_t> m_patterns;
@@ -55,8 +55,8 @@ class ledMgrBase
 		virtual void handleDeviceReset(const unsigned int sequence){}
 		virtual void handleDeviceResetAbort(){}
 		virtual void handleKeyPress(int key_code, int key_type){}
-		void setPowerState(bool state);
-		bool getPowerState();
+		void setPowerState(int state);
+		int getPowerState();
 		bool setError(unsigned int position, bool value);
 };
 
