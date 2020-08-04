@@ -22,8 +22,7 @@ After= iarmbusd.service dsmgr.service pwrmgr.service
 
 [Service]
 Type=simple
-ExecStartPre=/bin/sh -c '/lib/rdk/getNonRootUserStatus.sh'
-ExecStart=/bin/sh -c 'if [ -f /tmp/.EnableNonRootUser ]; then /bin/su non-root -c "/usr/bin/ledmgr"; else /usr/bin/ledmgr; fi'
+ExecStart=/usr/bin/ledmgr
 Restart=on-failure
 
 [Install]
