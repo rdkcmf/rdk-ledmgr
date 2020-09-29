@@ -58,7 +58,7 @@ class indicator
 		const std::string& getName() const;
 		int setState(indicatorState_t state);
 		int setBlink(const blinkPattern_t *pattern, int repetitions = -1);
-		int setColor(const unsigned int color);
+		void setColor(const unsigned int color);
 		int timerCallback(void);
 		void saveState();
 		void restoreState();
@@ -67,7 +67,7 @@ class indicator
 	private:
 		int step();
 		int registerCallback(unsigned int milliseconds);
-		int setBrightness(unsigned int intensity);
+		void setBrightness(unsigned int intensity);
 		int enableIndicator(bool enable);
 
 };
