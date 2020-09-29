@@ -106,7 +106,7 @@ const std::string& indicator::getName() const
  * @param[in] color   indicator color to be set.
  *
  */
-int indicator::setColor(const unsigned int color)
+void indicator::setColor(const unsigned int color)
 {
 	using namespace device;
 	try
@@ -124,7 +124,7 @@ int indicator::setColor(const unsigned int color)
  *
  * @param[in] intensity   intensity value of brightness.
  */
-int indicator::setBrightness(unsigned int intensity)
+void indicator::setBrightness(unsigned int intensity)
 {
 	using namespace device;
 	try
