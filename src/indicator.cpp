@@ -453,6 +453,11 @@ void indicator::executeFlare(const unsigned int percentage_increase, const unsig
 		{
 			flare_level = 100;
 		}
+
+		if(100 == preflare_brightness) {
+			flare_level = (preflare_brightness - percentage_increase);
+		}
+
 		setBrightness(flare_level);
 	}
 }
