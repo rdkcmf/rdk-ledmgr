@@ -51,6 +51,7 @@
 
 #include "ledmgr_types.hpp"
 #include "ledmgr.hpp"
+#include "cap.h"
 
 sem_t g_app_done_sem;
 
@@ -473,10 +474,40 @@ void* command_line_prompt(void *ptr)
 	return NULL;
 }
 
+static bool drop_root()
+{
+    bool ret = false,retval = false;
+    cap_user appcaps = {{0, 0, 0, '\0', 0, 0, 0, '\0'}};
+    ret = isBlacklisted();
+    if(ret)
+    {
+        INFO("NonRoot feature is disabled\n");
+    }
+    else
+    {
+        INFO("NonRoot feature is enabled\n");
+         appcaps.caps = NULL;
+         appcaps.user_name = NULL;
+         if(init_capability() != NULL) {
+            if(drop_root_caps(&appcaps) != -1) {
+               if(update_process_caps(&appcaps) != -1) {
+                   read_capability(&appcaps);
+                   retval = true;
+               }
+            }
+         }
+    }
+    return retval;
+}
+
 int main(int argc, char *argv[])
 {
 	setlinebuf(stdout); //necessary to make sure the logs get flushed when running as a daemon/service
 	INFO("ledmgr is running\n");
+	if(!drop_root())
+        {
+    	   ERROR("drop_root function failed!\n");
+        }
 	if(0 != sem_init(&g_app_done_sem, 0, 0))
 	{
 		ERROR("Could not initialize semaphore!\n");
