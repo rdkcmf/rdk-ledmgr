@@ -478,7 +478,7 @@ static bool drop_root()
 {
     bool ret = false,retval = false;
     cap_user appcaps = {{0, 0, 0, '\0', 0, 0, 0, '\0'}};
-    ret = isBlacklisted();
+    ret = isBlocklisted();
     if(ret)
     {
         INFO("NonRoot feature is disabled\n");
